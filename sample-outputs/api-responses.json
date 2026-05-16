@@ -1,0 +1,52 @@
+{
+  "signup": {
+    "status": 201,
+    "body": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": "6647a1c2f3a4b5c6d7e8f9a0",
+        "name": "John Doe",
+        "email": "john@example.com"
+      }
+    }
+  },
+  "createNote": {
+    "status": 201,
+    "body": {
+      "_id": "6647b2d3e4f5a6b7c8d9e0f1",
+      "title": "Sprint Planning",
+      "content": "<p>Today we need to...</p>",
+      "tags": ["work", "planning"],
+      "category": "Work",
+      "isArchived": false,
+      "isPublic": false,
+      "aiUsageCount": 0
+    }
+  },
+  "aiSummary": {
+    "status": 200,
+    "body": {
+      "summary": "The sprint planning session covered frontend tasks, AI integration, and a Friday deployment deadline.",
+      "action_items": [
+        "Complete the login page UI",
+        "Build the rich text editor",
+        "Connect Anthropic API",
+        "Deploy to production by Friday"
+      ],
+      "suggested_title": "Sprint Planning — Week 20"
+    }
+  },
+  "insights": {
+    "status": 200,
+    "body": {
+      "totalNotes": 12,
+      "recentlyEdited": 5,
+      "topTags": [
+        { "tag": "work", "count": 6 },
+        { "tag": "planning", "count": 4 },
+        { "tag": "personal", "count": 2 }
+      ],
+      "totalAiUsage": 8
+    }
+  }
+}
