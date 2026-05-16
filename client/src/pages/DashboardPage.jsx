@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import axiosInstance from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 /* ── Counter hook ── */
 const useCounter = (target, duration = 800) => {
@@ -175,7 +176,7 @@ const DashboardPage = () => {
   const topTags = insights?.topTags || [];
   const maxCount = topTags.reduce((m, t) => Math.max(m, t.count), 1);
   const tagCount = topTags.length;
-  const isDark = document.body.classList.contains('dark');
+  const { isDark } = useTheme();
 
   const statValues = {
     totalNotes: insights?.totalNotes,

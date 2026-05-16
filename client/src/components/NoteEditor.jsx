@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense, Component } from 'react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axios';
+import { useTheme } from '../context/ThemeContext';
 
 const ReactQuill = lazy(() =>
   import('react-quill-new').then((mod) => {
@@ -64,7 +65,7 @@ const NoteEditor = ({ note, onUpdateNote, onArchiveNote, allTags = [] }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const titleRef = useRef(null);
-  const isDark = document.body.classList.contains('dark');
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (note) {

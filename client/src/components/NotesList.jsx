@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axiosInstance from '../api/axios';
 import toast from 'react-hot-toast';
+import { useTheme } from '../context/ThemeContext';
 
 const PREDEFINED_TAGS = ['work', 'personal', 'planning', 'urgent'];
 const CATEGORIES = [
@@ -34,7 +35,7 @@ const NotesList = ({
 }) => {
   const [showArchived, setShowArchived] = useState(false);
   const [archivedNotes, setArchivedNotes] = useState([]);
-  const isDark = document.body.classList.contains('dark');
+  const { isDark } = useTheme();
 
   const fetchArchivedNotes = async () => {
     try {
