@@ -66,6 +66,21 @@ app.get('/ping', (req, res) => {
   res.json({ message: 'pong' });
 });
 
+// Diagnostic: test SMTP connection without sending email
+app.get('/test-email', async (req, res) => {
+  try {
+    const result = await verifyConnection();
+    res.json({
+      smtp: result ? 'connected' : 'failed',
+      emailUser: process.env.EMAIL_USER ? 'set' : 'MISSING',
+      emailPass: process.env.EMAIL_PASS ? 'set' : 'MISSING',
+      emailFrom: process.env.EMAIL_FROM ? 'set' : 'MISSING',
+    });
+  } catch (error) {
+    res.status(500).json({ smtp: 'error', message: error.message });
+  }
+});
+
 // ── Start server ────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 

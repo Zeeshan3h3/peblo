@@ -21,9 +21,9 @@
 const nodemailer = require('nodemailer');
 
 /**
- * Create transporter with explicit SMTP settings and timeouts.
- * Using direct SMTP config instead of `service: "gmail"` for
- * reliability on cloud hosting (Render/Railway/etc).
+ * Create transporter with explicit SMTP settings.
+ * Uses port 587 + STARTTLS which is more reliable on
+ * cloud hosting (Render/Railway) than port 465 + SSL.
  */
 function createTransporter() {
   const user = process.env.EMAIL_USER;
@@ -34,19 +34,22 @@ function createTransporter() {
     return null;
   }
 
+  console.log('[mailer] Creating transporter for:', user);
+
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // SSL on port 465
+    port: 587,
+    secure: false, // STARTTLS on port 587
     auth: { user, pass },
-    // Timeouts prevent the request from hanging forever on cloud hosts
-    connectionTimeout: 10000,  // 10s to establish connection
-    greetingTimeout: 10000,    // 10s for SMTP greeting
-    socketTimeout: 15000,      // 15s for socket inactivity
-    // Connection pooling for reliability
-    pool: true,
-    maxConnections: 3,
-    maxMessages: 10,
+    // Timeouts to prevent hanging on cloud hosts
+    connectionTimeout: 15000,  // 15s to establish TCP connection
+    greetingTimeout: 15000,    // 15s for SMTP greeting
+    socketTimeout: 20000,      // 20s for socket inactivity
+    // TLS options for cloud environments
+    tls: {
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2',
+    },
   });
 }
 
@@ -63,10 +66,12 @@ async function verifyConnection() {
   }
   try {
     await transporter.verify();
-    console.log('[mailer] SMTP connection verified — ready to send emails');
+    console.log('[mailer] ✅ SMTP connection verified — ready to send emails');
     return true;
   } catch (error) {
-    console.error('[mailer] SMTP verification FAILED:', error.message);
+    console.error('[mailer] ❌ SMTP verification FAILED:', error.code, error.message);
+    // Try to recreate with fresh credentials
+    transporter = createTransporter();
     return false;
   }
 }
@@ -76,7 +81,6 @@ async function verifyConnection() {
  */
 async function sendMail({ to, subject, html }) {
   if (!transporter) {
-    // Try to recreate in case env vars were loaded late
     transporter = createTransporter();
     if (!transporter) {
       throw new Error('Email service not configured — EMAIL_USER/EMAIL_PASS missing');
@@ -92,11 +96,10 @@ async function sendMail({ to, subject, html }) {
       subject,
       html,
     });
-    console.log(`[mailer] Email sent successfully — messageId: ${info.messageId}`);
+    console.log(`[mailer] ✅ Email sent — messageId: ${info.messageId}`);
     return info;
   } catch (error) {
-    console.error('[mailer] sendMail FAILED:', error.code, error.message);
-    // Re-throw with a clean message for the controller to catch
+    console.error('[mailer] ❌ sendMail FAILED:', error.code, error.message);
     throw new Error(`Email delivery failed: ${error.message}`);
   }
 }
