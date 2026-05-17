@@ -41,11 +41,12 @@ function createTransporter() {
     port: 587,
     secure: false, // STARTTLS on port 587
     auth: { user, pass },
+    // Force IPv4 — Render free tier doesn't support IPv6 outbound
+    family: 4,
     // Timeouts to prevent hanging on cloud hosts
-    connectionTimeout: 15000,  // 15s to establish TCP connection
-    greetingTimeout: 15000,    // 15s for SMTP greeting
-    socketTimeout: 20000,      // 20s for socket inactivity
-    // TLS options for cloud environments
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     tls: {
       rejectUnauthorized: false,
       minVersion: 'TLSv1.2',
