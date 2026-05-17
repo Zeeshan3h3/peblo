@@ -83,15 +83,22 @@ const login = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log("[forgot-password] Step 1: Request received for:", email);
+
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
     }
 
+    console.log("[forgot-password] Step 2: Looking up user in DB...");
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "No account found with this email" });
+      console.log("[forgot-password] Step 2: No user found for:", email);
+      // Security: always return 200 to prevent email enumeration
+      return res.status(200).json({ message: "If an account exists with this email, we've sent a reset code." });
     }
+    console.log("[forgot-password] Step 2: User found — id:", user._id);
 
+    console.log("[forgot-password] Step 3: Generating OTP...");
     const otp = generateOTP();
     const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
 
@@ -99,6 +106,7 @@ const forgotPassword = async (req, res) => {
     user.resetOTPExpiry = new Date(Date.now() + 10 * 60 * 1000);
     user.resetOTPVerified = false;
     await user.save();
+    console.log("[forgot-password] Step 3: OTP saved to DB (expiry: 10 min)");
 
     const emailHTML = `
 <!DOCTYPE html>
@@ -147,15 +155,19 @@ const forgotPassword = async (req, res) => {
 </html>
     `;
 
+    console.log("[forgot-password] Step 4: Sending email via SMTP...");
     await sendMail({
       to: user.email,
       subject: "Your Peblo Notes verification code",
       html: emailHTML,
     });
+    console.log("[forgot-password] Step 5: Email sent successfully!");
 
     res.status(200).json({ message: "OTP sent to your email address" });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.error("[forgot-password] FAILED at:", error.message);
+    console.error("[forgot-password] Full error:", error.stack);
+    res.status(500).json({ message: "Failed to send reset email. Please try again later." });
   }
 };
 

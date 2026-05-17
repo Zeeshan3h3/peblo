@@ -16,10 +16,16 @@ function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await axiosInstance.post('/auth/forgot-password', { email });
+      await axiosInstance.post('/auth/forgot-password', { email }, { timeout: 30000 });
       navigate('/verify-otp', { state: { email } });
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timed out. The server may be waking up — please try again in 30 seconds.');
+      } else if (!err.response) {
+        setError('Unable to reach the server. Please check your connection and try again.');
+      } else {
+        setError(err.response?.data?.message || 'Something went wrong');
+      }
     } finally {
       setIsSubmitting(false);
     }
