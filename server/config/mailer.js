@@ -115,8 +115,10 @@ async function sendMail({ to, subject, html }) {
 }
 
 async function sendViaResend({ to, subject, html }) {
+  // Free tier: must use onboarding@resend.dev; custom domains require verification
+  const resendFrom = process.env.RESEND_FROM || 'Peblo Notes <onboarding@resend.dev>';
   const { data, error } = await resendClient.emails.send({
-    from: process.env.EMAIL_FROM || 'Peblo Notes <onboarding@resend.dev>',
+    from: resendFrom,
     to: [to],
     subject,
     html,
