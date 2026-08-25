@@ -3,7 +3,22 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../api/axios';
 import { useTheme } from '../context/ThemeContext';
 
-const ReactQuill = lazy(() =>
+const lazyWithRetry = (componentImport) =>
+  lazy(async () => {
+    try {
+      const component = await componentImport();
+      sessionStorage.removeItem('chunk_reload');
+      return component;
+    } catch (error) {
+      if (!sessionStorage.getItem('chunk_reload')) {
+        sessionStorage.setItem('chunk_reload', 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
+
+const ReactQuill = lazyWithRetry(() =>
   import('react-quill-new').then((mod) => {
     import('react-quill-new/dist/quill.snow.css');
     return mod;
