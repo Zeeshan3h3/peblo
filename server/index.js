@@ -87,5 +87,9 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   // Verify SMTP connection (non-blocking, just logs the result)
-  await verifyConnection();
+  try {
+    await verifyConnection();
+  } catch (err) {
+    console.error('[startup] SMTP verification error (non-fatal):', err.message);
+  }
 });

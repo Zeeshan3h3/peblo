@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
-const KeyboardShortcuts = ({ onCreateNote, onForceSave, onGenerateSummary }) => {
+const KeyboardShortcuts = ({ onCreateNote, onGenerateSummary }) => {
   const [showModal, setShowModal] = useState(false);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -20,65 +22,84 @@ const KeyboardShortcuts = ({ onCreateNote, onForceSave, onGenerateSummary }) => 
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onCreateNote, onForceSave, onGenerateSummary]);
+  }, [onCreateNote, onGenerateSummary]);
 
   if (!showModal) return null;
 
+  const shortcuts = [
+    { keys: ['Ctrl', 'N'], desc: 'Create new note' },
+    { keys: ['Ctrl', 'S'], desc: 'Force save current note' },
+    { keys: ['Ctrl', '/'], desc: 'Generate AI summary' },
+    { keys: ['?'], desc: 'Show this help menu' },
+    { keys: ['Esc'], desc: 'Close this menu' },
+  ];
+
   return (
     <div 
-      style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
-        display: 'flex', alignItems: 'center', justifyContent: 'center'
-      }}
+      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
       onClick={() => setShowModal(false)}
     >
       <div 
-        style={{
-          backgroundColor: 'white', borderRadius: '12px', padding: '32px',
-          minWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          color: '#1E1E2E'
-        }}
+        className={`w-full max-w-md p-8 rounded-3xl shadow-peblo-lg animate-fade-up border ${
+          isDark 
+            ? 'bg-peblo-950/90 border-peblo-800/30 text-white' 
+            : 'bg-white/90 border-peblo-100 text-peblo-900'
+        } backdrop-blur-md`}
         onClick={e => e.stopPropagation()}
       >
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Keyboard Shortcuts ⌨️</h2>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-2xl bg-peblo-500 text-white shadow-peblo">
+            <i className="bi bi-keyboard-fill text-xl"></i>
+          </div>
+          <div>
+            <h2 className="text-2xl font-display font-bold leading-none mb-1">Shortcuts</h2>
+            <p className={`text-sm ${isDark ? 'text-peblo-300' : 'text-peblo-600'}`}>Master your productivity</p>
+          </div>
+        </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ background: '#1E1E2E', color: 'white', padding: '4px 10px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px', fontWeight: 600 }}>Ctrl + N</span>
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>Create new note</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ background: '#1E1E2E', color: 'white', padding: '4px 10px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px', fontWeight: 600 }}>Ctrl + S</span>
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>Force save current note</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ background: '#1E1E2E', color: 'white', padding: '4px 10px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px', fontWeight: 600 }}>Ctrl + /</span>
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>Generate AI summary</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ background: '#1E1E2E', color: 'white', padding: '4px 10px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px', fontWeight: 600 }}>?</span>
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>Show this help menu</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ background: '#1E1E2E', color: 'white', padding: '4px 10px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px', fontWeight: 600 }}>Escape</span>
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>Close this menu</span>
-          </div>
+        <div className="space-y-4">
+          {shortcuts.map((s, idx) => (
+            <div 
+              key={idx}
+              className={`flex justify-between items-center p-3 rounded-xl transition-all duration-300 ${
+                isDark ? 'hover:bg-peblo-900/50' : 'hover:bg-peblo-50'
+              }`}
+            >
+              <span className={`text-sm font-medium ${isDark ? 'text-peblo-100' : 'text-peblo-800'}`}>
+                {s.desc}
+              </span>
+              <div className="flex gap-1.5">
+                {s.keys.map((key, kIdx) => (
+                  <kbd 
+                    key={kIdx}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold shadow-sm border ${
+                      isDark 
+                        ? 'bg-peblo-900 border-peblo-700 text-peblo-300' 
+                        : 'bg-peblo-50 border-peblo-200 text-peblo-600'
+                    }`}
+                  >
+                    {key}
+                  </kbd>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <button 
           onClick={() => setShowModal(false)}
-          style={{
-            backgroundColor: '#4F46E5', color: 'white', width: '100%',
-            padding: '12px', borderRadius: '8px', marginTop: '24px',
-            fontWeight: 600
-          }}
+          className="w-full mt-8 py-3.5 rounded-2xl bg-peblo-600 hover:bg-peblo-700 text-white font-bold transition-all duration-300 shadow-peblo hover:shadow-peblo-lg transform hover:-translate-y-0.5 active:translate-y-0"
         >
-          Got it
+          Got it, let's write!
         </button>
+
+        <p className={`text-center mt-4 text-[10px] uppercase tracking-widest font-bold ${isDark ? 'text-peblo-500' : 'text-peblo-300'}`}>
+          Peblo Notes v1.0 • Built with AI
+        </p>
       </div>
     </div>
   );
 };
 
 export default KeyboardShortcuts;
+
